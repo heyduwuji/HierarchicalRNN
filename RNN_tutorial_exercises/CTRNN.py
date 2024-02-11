@@ -3,7 +3,7 @@ from torch import nn
 
 class CTRNN(nn.Module):
     def __init__(self, input_size, hidden_size, tau=100, dt=None, **keywords):
-        super.__init__()
+        super().__init__()
         self.input_size = input_size
         self.hidden_size = hidden_size
         if dt:
@@ -26,22 +26,23 @@ class CTRNN(nn.Module):
         return h_new
 
     def forward(self, input, hidden=None):
-        # input have size (seq_len, batch_size, embedding_size)
+        # input have shape (seq_len, batch_size, embedding_size)
         if hidden is None:
             hidden = self.init_hidden(input.shape)
 
         output = []
         step = input.size(0)
-        for i in step:
+        for i in range(step):
             hidden = self.recurrence(input[i], hidden)
             output.append(hidden)
+            print("output.shape", output[0].shape)
 
         output = torch.stack(output, dim=0)
         return output, hidden
 
 class RNNNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, tau=100, dt=None, **keywords):
-        super.__init__()
+        super().__init__()
         self.rnn = CTRNN(input_size, hidden_size, tau, dt, **keywords)
         self.fc = nn.Linear(hidden_size, output_size)
 

@@ -9,6 +9,5 @@ class MaskedMSELoss(nn.Module):
         # target has shape (seq_len, batch_size, output_size)
         loss = (input - target) ** 2
         loss = loss * mask
-        loss = torch.sum(loss, dim=(1,2))
         loss = torch.mean(loss)
         return loss

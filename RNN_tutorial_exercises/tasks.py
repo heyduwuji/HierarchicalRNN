@@ -110,7 +110,7 @@ class PerceptualDecisionMakingMod1(ngym.TrialEnv):
             'stimulus1': 2000,
             'delay': 0,
             'stimulus2': 0,
-            'go': 100}
+            'go': 200}
         if timing:
             self.timing.update(timing)
 
@@ -204,7 +204,7 @@ class PerceptualDecisionMakingMod2(ngym.TrialEnv):
             'stimulus1': 2000,
             'delay': 0,
             'stimulus2': 0,
-            'go': 100}
+            'go': 200}
         if timing:
             self.timing.update(timing)
 

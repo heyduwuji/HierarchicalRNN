@@ -1,0 +1,18 @@
+[
+    {
+        "task_name": "PerceptualDecisionMakingMod1",
+        "batch_size": 16,
+        "keywords": {
+            "dt": 20
+        },
+        "alias": "DM1"
+    },
+    {
+        "task_name": "PerceptualDecisionMakingMod2",
+        "batch_size": 16,
+        "keywords": {
+            "dt": 20
+        },
+        "alias": "DM2"
+    }
+]

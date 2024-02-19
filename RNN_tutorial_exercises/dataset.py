@@ -14,29 +14,32 @@ class myDataset():
     def __call__(self):
         input = []
         target = []
-        masks = []
+        angle = []
+        # generate batch
         for i in range(self.batch_size):
-            self.env.new_trial()
+            self.env.new_trial(new_batch = i == 0)
             ob, gt = self.env.ob, self.env.gt
-            response_start_idx = self.env.start_t['go'] // self.env.dt
-            grace_period = 100 // self.env.dt
-            mask = np.zeros_like(gt)
-            mask[:response_start_idx, 1:] = 1
-            mask[:response_start_idx, 0] = 2
-            mask[response_start_idx:response_start_idx+grace_period, 1:] = 0
-            mask[response_start_idx+grace_period:, 1:] = 5
-            mask[response_start_idx+grace_period:, 0] = 10
+            target_angle = self.env.target_angle
             input.append(ob)
             target.append(gt)
-            masks.append(mask)
-        max_len = max([len(x) for x in input])
-        input = [np.pad(x, ((0, max_len - len(x)), (0, 0)), 'constant', constant_values=0) for x in input]
-        target = [np.pad(x, ((0, max_len - len(x)), (0, 0)), 'constant', constant_values=0) for x in target]
-        masks = [np.pad(x, ((0, max_len - len(x)), (0, 0)), 'constant', constant_values=0) for x in masks]
+            angle.append(target_angle)
+        angle = np.array(angle)
         input = np.array(input).transpose(1, 0, 2)
         target = np.array(target).transpose(1, 0, 2)
-        masks = np.array(masks).transpose(1, 0, 2)
-        return input, target, masks
+        #generate mask
+        mask = np.zeros_like(target)
+        response_start_idx = self.env.start_t['go'] // self.env.dt
+        grace_period = 100 // self.env.dt
+        mask[:response_start_idx, :, 1:] = 1
+        mask[:response_start_idx, :, 0] = 2
+        mask[response_start_idx:response_start_idx+grace_period, :, 1:] = 0
+        mask[response_start_idx+grace_period:, :, 1:] = 5
+        mask[response_start_idx+grace_period:, :, 0] = 10
+        # angle has shape (batch_size, )
+        # input have shape (seq_len, batch_size, input_size)
+        # target have shape (seq_len, batch_size, output_size)
+        # mask have shape (seq_len, batch_size, output_size)
+        return input, target, mask, angle
 
 def get_dataset(task_name, batch_size, **keywords) -> ngym.Dataset:
     if task_name in task_dict:

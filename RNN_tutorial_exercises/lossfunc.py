@@ -7,7 +7,8 @@ class MaskedMSELoss(nn.Module):
 
     def forward(self, input, target, mask):
         # target has shape (seq_len, batch_size, output_size)
-        loss = (input - target) ** 2
+        loss = input - target
         loss = loss * mask
+        loss = loss ** 2
         loss = torch.mean(loss)
         return loss

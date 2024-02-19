@@ -49,6 +49,9 @@ class SequentialHRNN(nn.Module):
         self.connect()
 
     def connect(self):
+        if len(self.layers) == 1:
+            self.layers[0].connect(self.input_size, self.output_size)
+            return
         for i in range(len(self.layers)):
             if i == 0:
                 self.layers[i].connect(self.input_size, self.layers[i+1].hidden_size)
@@ -63,6 +66,10 @@ class SequentialHRNN(nn.Module):
 
     def recurrence(self, input):
         out = []
+        if len(self.layers) == 1:
+            hidden = self.layers[0](input, None, self.activity[0][-1])
+            out.append(hidden)
+            return out
         for i in range(len(self.layers)):
             if i == 0:
                 hidden = self.layers[i](input, self.activity[i+1][-1], self.activity[i][-1])

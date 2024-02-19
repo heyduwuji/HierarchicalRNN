@@ -1,17 +1,12 @@
 [
     {
         "hidden_size": 256,
-        "tau": 40,
+        "tau": 100,
         "dt": 20
     },
     {
         "hidden_size": 256,
-        "tau": 40,
-        "dt": 20
-    },
-    {
-        "hidden_size": 256,
-        "tau": 40,
+        "tau": 100,
         "dt": 20
     }
 ]

@@ -20,14 +20,14 @@ def train(model_config_file, data_config_file, save_path, checkpoint=None):
         net.load_state_dict(torch.load(checkpoint))
 
     trainer = Trainer(net, dataset, Omega=None)
-    n_iter = 5000
+    n_iter = 50000
     lr = 0.01
     record_freq = 100
-    net, Omega = trainer.train_all(n_iter, lr, record_freq)
+    net, Omega = trainer.train_all(n_iter, lr, record_freq, save_path+'_model', save_path+'_omega')
     import random
     print(random.choice(list(Omega.items())))
-    torch.save(net.state_dict(), save_path)
+    # torch.save(net.state_dict(), save_path)
     print('trainning finished')
 
 if __name__ == '__main__':
-    train('model_config.json', 'data_config.json', './checkpoint/test.pth')
+    train('model_config.json', 'data_config.json', './checkpoint/compare')

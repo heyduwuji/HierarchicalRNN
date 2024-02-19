@@ -125,25 +125,45 @@ class PerceptualDecisionMakingMod1(ngym.TrialEnv):
         name = {'fixation': 0, 'target': range(1, 33)}
         self.action_space = ngym.spaces.Box(
             -np.inf, np.inf, shape=(1+ 32,), dtype=np.float32, name=name)
+        self.n_eachring = 32     
+        self.pref = np.arange(0,2*np.pi,2*np.pi/self.n_eachring)
+        
+    def new_batch(self):
+        self.fixation_time = self.rng.uniform(100, 400)
+        self.stim_time = self.rng.choice(self.stim_time_space)
+        self.go_time = 500
+
+    def _get_dist(self, original_dist):
+        return np.minimum(abs(original_dist),2*np.pi-abs(original_dist))
+    
+    def _get_loc(self, loc):
+        dist = self._get_dist(loc - self.pref)
+        dist /= np.pi / 8
+        y = 0.8*np.exp(-dist**2/2)
+        return y
 
     def _new_trial(self, **kwargs):
+        # new batch
+        if kwargs.get('new_batch', True):
+            self.new_batch()
+
+        # all trials in the same batch have same length
         average_strength = self.rng.uniform(0.8, 1.2)
         coherence = self.rng.choice(self.coherence_space)
-        stim_time = self.rng.choice(self.stim_time_space)
         strength1 = average_strength + coherence
         strength2 = average_strength - coherence
         angle1 = self.rng.uniform(0, 2*np.pi)
         angle2 = self.rng.uniform(angle1 + 0.5 * np.pi, (angle1 + 0.5 * np.pi) % (2 * np.pi))
         target_angle = angle1 if strength1 > strength2 else angle2
-        mod1_angle = np.linspace(0, 2 * np.pi, 32 + 1)[:-1]
+        self.target_angle = target_angle
         u_mod2 = np.zeros(32)
-        u_mod1_stim1 = strength1 * 0.8 * np.exp(-0.5 * (8 * np.abs(angle1 - mod1_angle) / np.pi) ** 2)
-        u_mod1_stim2 = strength2 * 0.8 * np.exp(-0.5 * (8 * np.abs(angle2 - mod1_angle) / np.pi) ** 2)
+        u_mod1_stim1 = strength1 * self._get_loc(angle1)
+        u_mod1_stim2 = strength2 * self._get_loc(angle2)
         u_mod1 = u_mod1_stim1 + u_mod1_stim2
-        target = 0.8 * np.exp(-0.5 * (8 * np.abs(target_angle - mod1_angle) / np.pi) ** 2) + 0.05
+        target = self._get_loc(target_angle) + 0.05
 
         # set random stimulus time
-        timing = {'stimulus1': int(stim_time)}
+        timing = {'stimulus1': int(self.stim_time), 'fixation': int(self.fixation_time), 'go': int(self.go_time)}
         self.timing.update(timing)
 
         # Trial info
@@ -152,8 +172,7 @@ class PerceptualDecisionMakingMod1(ngym.TrialEnv):
             'angle 2': angle2,
             'strength 1': strength1,
             'strength 2': strength2,
-            'coh': coherence,
-            'stim_time': stim_time
+            'coh': coherence
         }
         trial.update(kwargs)
 
@@ -219,25 +238,45 @@ class PerceptualDecisionMakingMod2(ngym.TrialEnv):
         name = {'fixation': 0, 'target': range(1, 33)}
         self.action_space = ngym.spaces.Box(
             -np.inf, np.inf, shape=(1+ 32,), dtype=np.float32, name=name)
+        self.n_eachring = 32     
+        self.pref = np.arange(0,2*np.pi,2*np.pi/self.n_eachring)
+        
+    def new_batch(self):
+        self.fixation_time = self.rng.uniform(100, 400)
+        self.stim_time = self.rng.choice(self.stim_time_space)
+        self.go_time = 500
+
+    def _get_dist(self, original_dist):
+        return np.minimum(abs(original_dist),2*np.pi-abs(original_dist))
+    
+    def _get_loc(self, loc):
+        dist = self._get_dist(loc - self.pref)
+        dist /= np.pi / 8
+        y = 0.8*np.exp(-dist**2/2)
+        return y
 
     def _new_trial(self, **kwargs):
+        # new batch
+        if kwargs.get('new_batch', True):
+            self.new_batch()
+
+        # all trials in the same batch have same length
         average_strength = self.rng.uniform(0.8, 1.2)
         coherence = self.rng.choice(self.coherence_space)
-        stim_time = self.rng.choice(self.stim_time_space)
         strength1 = average_strength + coherence
         strength2 = average_strength - coherence
         angle1 = self.rng.uniform(0, 2*np.pi)
         angle2 = self.rng.uniform(angle1 + 0.5 * np.pi, (angle1 + 0.5 * np.pi) % (2 * np.pi))
         target_angle = angle1 if strength1 > strength2 else angle2
-        mod2_angle = np.linspace(0, 2 * np.pi, 32 + 1)[:-1]
+        self.target_angle = target_angle
         u_mod1 = np.zeros(32)
-        u_mod2_stim1 = strength1 * 0.8 * np.exp(-0.5 * (8 * np.abs(angle1 - mod2_angle) / np.pi) ** 2)
-        u_mod2_stim2 = strength2 * 0.8 * np.exp(-0.5 * (8 * np.abs(angle2 - mod2_angle) / np.pi) ** 2)
+        u_mod2_stim1 = strength1 * self._get_loc(angle1)
+        u_mod2_stim2 = strength2 * self._get_loc(angle2)
         u_mod2 = u_mod2_stim1 + u_mod2_stim2
-        target = 0.8 * np.exp(-0.5 * (8 * np.abs(target_angle - mod2_angle) / np.pi) ** 2) + 0.05
+        target = self._get_loc(target_angle) + 0.05
 
         # set random stimulus time
-        timing = {'stimulus1': int(stim_time)}
+        timing = {'stimulus1': int(self.stim_time), 'fixation': int(self.fixation_time), 'go': int(self.go_time)}
         self.timing.update(timing)
 
         # Trial info
@@ -246,8 +285,7 @@ class PerceptualDecisionMakingMod2(ngym.TrialEnv):
             'angle 2': angle2,
             'strength 1': strength1,
             'strength 2': strength2,
-            'coh': coherence,
-            'stim_time': stim_time
+            'coh': coherence
         }
         trial.update(kwargs)
 
